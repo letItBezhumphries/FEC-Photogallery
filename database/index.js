@@ -4,8 +4,7 @@ const seedData = require("../seed/generateSeedData");
 const seedMongodb = require("../seed/seedMongodb");
 const { dropCollection } = require("./dropCollection");
 
-const db =
-  "mongodb+srv://admin:barkley34@devbrokentable.kcw1t.mongodb.net/restaurants?retryWrites=true&w=majority";
+const db = process.env.MONGO_URI
 
 const connectDB = async () => {
   try {
