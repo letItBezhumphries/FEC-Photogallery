@@ -1,10 +1,10 @@
-require("dotenv").config();
-const mongoose = require("mongoose");
-const seedData = require("../seed/generateSeedData");
-const seedMongodb = require("../seed/seedMongodb");
-const { dropCollection } = require("./dropCollection");
+require('dotenv').config();
+const mongoose = require('mongoose');
+const seedData = require('../seed/generateSeedData');
+const seedMongodb = require('../seed/seedMongodb');
+const { dropCollection } = require('./dropCollection');
 
-const db = process.env.MONGO_URI
+const db = `mongodb+srv://${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@${process.env.DEV_ATLAS_PROJECT}.mongodb.net/${process.env.DATABASE_NAME}?retryWrites=true&w=majority`;
 
 const connectDB = async () => {
   try {
@@ -12,10 +12,10 @@ const connectDB = async () => {
       useNewUrlParser: true,
       useCreateIndex: true,
       useFindAndModify: false,
-      useUnifiedTopology: true,
+      useUnifiedTopology: true
     });
 
-    console.log("MongoDB Connected...");
+    console.log('MongoDB Connected...');
 
     await dropCollection();
 

@@ -24,6 +24,7 @@ coverage
 build/
 bundle.js
 
+public/dist
 config.json
 .env
 
