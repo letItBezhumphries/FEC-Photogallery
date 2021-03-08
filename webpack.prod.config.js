@@ -5,6 +5,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const Dotenv = require('dotenv-webpack');
+const ESLintPlugin = require('eslint-webpack-plugin');
 
 module.exports = {
   entry: `${SRC_DIR}/index.js`,
@@ -35,8 +36,8 @@ module.exports = {
         use: ['file-loader']
       },
       {
-        test: /\.(svg)$/,
-        type: 'asset/inline'
+        test: /\.svg$/,
+        use: ['@svgr/webpack']
       }
     ]
   },
@@ -51,6 +52,9 @@ module.exports = {
       template: './public/index.html',
       filename: 'index.html'
     }),
-    new Dotenv()
+    new Dotenv(),
+    new ESLintPlugin({
+      fix: true
+    })
   ]
 };
