@@ -1,6 +1,6 @@
 version: 2.1
 executors:
-  photosApp-executor:
+  photos-executor:
     docker:
       - image: circleci/node:14.5.0
     working_directory: ~/photos-repo
@@ -44,7 +44,7 @@ aliases:
 
 jobs:
   build:
-    executor: photosApp-executor
+    executor: photos-executor
     steps:
       - checkout
       - *show-current-branch-name
@@ -53,7 +53,7 @@ jobs:
       - *save-cache
 
   linting:
-    executor: photosApp-executor
+    executor: photos-executor
     steps:
       - checkout
       - *show-current-branch-name
@@ -63,7 +63,7 @@ jobs:
           command: npm run lint
 
   deploy-to-aws-s3:
-    executor: photosApp-executor
+    executor: photos-executor
     steps:
       - checkout
       - *show-current-branch-name
@@ -83,7 +83,7 @@ jobs:
             fi
 
   deploy-to-aws-cloudfront:
-    executor: photosApp-executor
+    executor: photos-executor
     steps:
       - checkout
       - *show-current-branch-name
