@@ -7,26 +7,26 @@ output "photogallery_cloudfront_distribution_id" {
 }
 
 output "photogallery_service_ip_address" {
-  description = "The ip address for the photogallery service"
-  value = aws_instance.photogallery-service.public_ip
+  # description = "The ip address for the photogallery service"
+  value       = aws_instance.photogallery-service.public_ip
 }
 
 output "vpc_id" {
-  description = "The ID of the VPC"
+  # description = "The ID of the VPC"
   value       = module.main-vpc.vpc_id
 }
 
 output "private_subnets" {
-  description = "List of IDs of private subnets"
+  # description = "List of IDs of private subnets"
   value       = module.main-vpc.private_subnets
 }
 
 output "public_subnets" {
-  description = "List of IDs of public subnets"
+  # description = "List of IDs of public subnets"
   value       = module.main-vpc.public_subnets
 }
 
 output "photogallery_securitygroup_id" {
-  description = "Security group id for the photogallery service instance"
+  # description = "Security group id for the photogallery service instance"
   value       = aws_security_group.photogallery_service_securitygroup.id
 }
