@@ -97,32 +97,33 @@ jobs:
           name: Run prettier check
           command: npm run prettier:check
 
-  # packer-build-aws-ami:
-  #   executor: packer-executor
-  #   environment:
-  #     AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-  #     AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-  #   steps:
-  #     - checkout
-  #     - attach_workspace:
-  #         at: ./
-  #     - *show-current-branch-name
-  #     - *install-aws-cli
-  #     - run:
-  #         name: Packer build AWS custom ami
-  #         command: |
-  #           cd infrastructure/
-  #           ssh-keygen -f mykey
-  #           ARTIFACT=`packer build -machine-readable packer-example.json |awk -F, '$0 ~/artifact,0,id/ {print $6}'`
-  #           AMI_ID=`echo $ARTIFACT | cut -d ':' -f2`
-  #           echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > amivar.tf
+  packer-build-aws-ami:
+    executor: packer-executor
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - *show-current-branch-name
+      - run:
+          name: Packer build AWS ami
+          command: |
+            cd infrastructure/
+            ssh-keygen -f mykey
+            ARTIFACT=$(packer build -machine-readable photogallery-packer.json | awk -F, '$0 ~/artifact,0,id/ {print $6}')
+            echo $ARTIFACT
+            AMI_ID=$(echo $ARTIFACT | cut -d ':' -f2)
+            echo $AMI_ID
+            echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > amivar.tf
+      - persist_to_workspace:
+          root: ./
+          paths:
+            - artifacts
 
   terraform-validate:
     executor: terraform-executor
     steps:
       - checkout
       - *show-current-branch-name
-      # - *install-packer
       - run:
           name: Terraform validate & format
           command: |
