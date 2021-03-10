@@ -253,9 +253,18 @@ workflows:
                 - develop
                 - staging
                 - master
-      - terraform-plan-and-apply:
+      - packer-build-aws-ami:
           requires:
             - terraform-validate
+          filters:
+            branches:
+              only:
+                - develop
+                - staging
+                - master
+      - terraform-plan-and-apply:
+          requires:
+            - packer-build-aws-ami
           filters:
             branches:
               only:
