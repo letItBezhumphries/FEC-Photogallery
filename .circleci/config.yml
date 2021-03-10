@@ -60,12 +60,6 @@ aliases:
         curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
         sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
         sudo apt-get update && sudo apt-get install packer
-  - &install-sshd
-    run:
-      name: Install sshd
-      command: |
-        sudo apt-get -y -qq update
-        sudo apt-get install -y sshd
 
 jobs:
   build:
@@ -111,7 +105,7 @@ jobs:
       - attach_workspace:
           at: ./
       - *show-current-branch-name
-      - *install-sshd
+
       - run:
           name: Packer build AWS ami
           command: |
