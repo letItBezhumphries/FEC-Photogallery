@@ -27,6 +27,8 @@ bundle.js
 public/dist
 config.json
 .env
+mykey
+mykey.pub
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*

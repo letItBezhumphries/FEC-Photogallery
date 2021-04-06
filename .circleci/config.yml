@@ -1,5 +1,3 @@
-orbs:
-  slack: circleci/slack@4.2.0
 version: 2.1
 executors:
   photos-executor:
@@ -105,12 +103,13 @@ jobs:
       - attach_workspace:
           at: ./
       - *show-current-branch-name
-
+      - add_ssh_keys:
+          fingerprints:
+            - MD5:b7:c2:bd:7a:e1:2f:9b:91:f8:35:69:73:80:f4:8e:ce
       - run:
           name: Packer build AWS ami
           command: |
             cd infrastructure/
-            ssh-keygen -f mykey
             ARTIFACT=$(packer build -machine-readable photogallery-packer.json | awk -F, '$0 ~/artifact,0,id/ {print $6}')
             echo $ARTIFACT
             AMI_ID=$(echo $ARTIFACT | cut -d ':' -f2)
