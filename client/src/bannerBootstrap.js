@@ -5,7 +5,7 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import store from './redux/store';
 
-const mountPhotoGallery = (elem) => {
+const mountPhotoBanner = (elem) => {
   ReactDOM.render(
     <Provider store={store}>
       <Router>
@@ -20,8 +20,8 @@ if (process.env.NODE_ENV === 'development') {
   const standalonePhotoBanner = document.querySelector('#PhotoBanner');
 
   if (standalonePhotoBanner) {
-    mountPhotoGallery(standalonePhotoBanner);
+    mountPhotoBanner(standalonePhotoBanner);
   }
 }
 
-export { mountPhotoGallery };
+export { mountPhotoBanner };

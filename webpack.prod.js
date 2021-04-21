@@ -85,8 +85,8 @@ const prodConfig = {
       name: "photogallery",
       filename: "remoteEntry.js",
       exposes: {
-        "./PhotoBannerIndex": "./client/src/components/photoBanner/PhotoBanner.js",
-        "./PhotoGalleryIndex": "./client/src/index.js",
+        "./PhotoBanner": "./client/src/bannerBootstrap.js",
+        "./PhotoGallery": "./client/src/bootstrap.js",
       },
       shared: packageJson.dependencies,
     }),

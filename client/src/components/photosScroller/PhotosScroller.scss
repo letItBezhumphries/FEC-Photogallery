@@ -1,7 +1,7 @@
 .gallery-scroller {
   position: relative;
-  height: 590px;
-  width: 660px;
+  min-height: 640px;
+  min-width: 660px;
   margin: 0 auto;
   display: flex;
   justify-content: center;
@@ -13,19 +13,10 @@
   position: static;
   margin: 0px;
   padding: 0px;
-  width: 590px;
-  height: 590px;
+  width: 610px;
+  height: 610px;
 }
 
-// .photo-container {
-//   background-color: burlywood;
-//   height: 400px;
-//   width: 400px;
-//   display: flex;
-//   flex-direction: column;
-//   justify-content: center;
-//   align-items: space-between;
-// }
 
 .arrow-btn {
   background-color: transparent;

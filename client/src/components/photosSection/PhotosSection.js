@@ -6,11 +6,11 @@ import { getRestaurantPhotos, setPhotosFilter } from '../../redux/actions/restau
 import Spinner from '../layout/spinner/Spinner';
 import Grid from '../layout/grid/Grid';
 import Tabs from '../layout/tabs/Tabs';
-import ModalBackground from '../layout/modal/ModalBackground';
+import Modal from '../layout/modal/Modal';
 import getTabFilterOptions from '../utils/getTabFilterOptions';
 import './PhotosSection.scss';
 
-const PhotosSection = ({ getRestaurantPhotos, setPhotosFilter, name, loading, photos, filterType, viewModal }) => {
+const PhotosSection = ({ getRestaurantPhotos, setPhotosFilter, name, loading, photos, filterType, viewModal, currentIndex }) => {
   const { id } = useParams();
   const [filterLabels, setFilterLabels] = useState();
 
@@ -29,32 +29,30 @@ const PhotosSection = ({ getRestaurantPhotos, setPhotosFilter, name, loading, ph
   };
 
   return loading && !name
-    ? (
-    <Spinner />
-      )
+    ? (<Spinner />)
     : (
-    <Fragment>
-      <div className="content">
-        <div className="photo-gallery">
-          <div className="photo-gallery-header">
-            <h2 className="photo-gallery-header__text"> {!loading && photos.length ? photos.length : null} Photos</h2>
+      <Fragment>
+        <div className="content">
+          <div className="photo-gallery">
+            <div className="photo-gallery-header">
+              <h2 className="photo-gallery-header__text"> {!loading && photos.length ? photos.length : null} Photos</h2>
+            </div>
+            {filterLabels && (
+              <Tabs onTabClick={handleFilterClick}>
+                <div label="All">All</div>
+                <div label="Interior">Interior</div>
+                <div label="Exterior">Exterior</div>
+                <div label="Food">Food</div>
+                <div label="Drink">Drink</div>
+              </Tabs>
+            )}
+
+            {!loading && photos.length ? <Grid /> : null}
           </div>
-          {filterLabels && (
-            <Tabs onTabClick={handleFilterClick}>
-              <div label="All">All</div>
-              <div label="Interior">Interior</div>
-              <div label="Exterior">Exterior</div>
-              <div label="Food">Food</div>
-              <div label="Drink">Drink</div>
-            </Tabs>
-          )}
-
-          {!loading && photos.length ? <Grid /> : null}
         </div>
-      </div>
 
-      <ModalBackground />
-    </Fragment>
+        { viewModal ? <Modal /> : null }
+      </Fragment>
       );
 };
 
@@ -65,7 +63,8 @@ PhotosSection.propTypes = {
   loading: PropTypes.bool.isRequired,
   photos: PropTypes.array.isRequired,
   filterType: PropTypes.string.isRequired,
-  viewModal: PropTypes.bool.isRequired
+  viewModal: PropTypes.bool.isRequired,
+  currentIndex: PropTypes.number
 };
 
 const mapStateToProps = (state) => ({
@@ -73,7 +72,8 @@ const mapStateToProps = (state) => ({
   loading: state.restaurant.loading,
   photos: state.restaurant.photos,
   filterType: state.restaurant.filterType,
-  viewModal: state.restaurant.viewModal
+  viewModal: state.restaurant.viewModal,
+  currentIndex: state.restaurant.currentIndex
 });
 
 export default connect(mapStateToProps, {

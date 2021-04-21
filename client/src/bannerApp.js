@@ -6,7 +6,7 @@ import './App.scss';
 const BannerApp = () => {
   return (
     <div className="main">
-      <Route exact path="/restaurants/:id/banner" component={PhotoBanner} />
+      <Route exact path="/restaurants/:id" component={PhotoBanner} />
     </div>
   );
 };

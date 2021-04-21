@@ -17,10 +17,6 @@ const PhotoBanner = ({ heroImage, loading, getRestaurantPhotos }) => {
     getRestaurantPhotos(id);
   }, [id, getRestaurantPhotos]);
 
-  const bannerStyle = {
-    backgroundImage: `url(${heroImage})`
-  };
-
   const handleRestaurantSaveClick = (className) => {
     if (className === 'btn-icon-saved') {
       setButtonIconClassName('btn-icon');
@@ -37,7 +33,9 @@ const PhotoBanner = ({ heroImage, loading, getRestaurantPhotos }) => {
     : (
       <Fragment>
         <div className="banner-container">
-          <div className="banner-background img-fluid" style={bannerStyle}></div>
+          <div className="banner-background img-fluid">
+            <img src={heroImage} />
+          </div>
           <div className="banner-btn-box" onClick={() => handleRestaurantSaveClick(buttonIconClassName)}>
             <button className="save-favorite-btn">
               <span>
