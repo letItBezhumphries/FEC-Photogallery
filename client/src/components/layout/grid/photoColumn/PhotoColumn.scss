@@ -1,7 +1,6 @@
 .left-box {
   grid-column: 1 / 2;
   grid-row: 1 / 2;
-  // max-height: 35rem;
   max-height: 100%;
   width: 100%;
   display: grid;
@@ -52,11 +51,10 @@
   max-height: 35rem;
 }
 
-// for when center box is a grid of 4 photos
+
 .center-box-grid-photos-4 {
   max-width: 100%;
   max-height: 303px;
-  // max-height: 35rem;
   grid-column: 2 / -1;
   display: grid;
   grid-template-rows: repeat(2, minmax(49%, min-content));

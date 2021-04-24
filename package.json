@@ -14,7 +14,8 @@
     ]
   },
   "scripts": {
-    "start": "node ./server/server.js",
+    "start": "NODE_ENV=production node ./server/server.js",
+    "start:dev": "NODE_ENV=development node ./server/server.js",
     "build": "webpack --config webpack.prod.js",
     "dev": "webpack serve --config webpack.dev.js",
     "lint": "eslint 'client/src**/*.js*'",
@@ -82,6 +83,7 @@
     "node-sass": "^4.14.1",
     "nodemon": "^1.19.4",
     "postcss-cli": "^8.3.1",
+    "postcss-loader": "^5.2.0",
     "prettier": "^2.2.1",
     "purgecss-webpack-plugin": "^4.0.3",
     "request": "^2.88.2",

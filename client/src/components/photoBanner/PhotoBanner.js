@@ -29,28 +29,27 @@ const PhotoBanner = ({ heroImage, loading, getRestaurantPhotos }) => {
 
   console.log('photos:', heroImage, 'loading:', loading);
   return loading && !heroImage
-    ? <Spinner />
+    ? (
+    <Spinner />
+      )
     : (
-      <Fragment>
-        <div className="banner-container">
-          <div className="banner-background img-fluid">
-            <img src={heroImage} />
-          </div>
-          <div className="banner-btn-box" onClick={() => handleRestaurantSaveClick(buttonIconClassName)}>
-            <button className="save-favorite-btn">
-              <span>
-                <div className="btn-inner">
-                  { buttonIconClassName === 'btn-icon'
-                    ? <BookmarkOutlineIcon className={buttonIconClassName} />
-                    : <BookmarkIcon className={buttonIconClassName} />
-                  }
-                  <div className="btn-text">{buttonText}</div>
-                </div>
-              </span>
-            </button>
-          </div>
+    <Fragment>
+      <div className="banner-container">
+        <div className="banner-background img-fluid">
+          <img src={heroImage} />
         </div>
-      </Fragment>
+        <div className="banner-btn-box" onClick={() => handleRestaurantSaveClick(buttonIconClassName)}>
+          <button className="save-favorite-btn">
+            <span>
+              <div className="btn-inner">
+                {buttonIconClassName === 'btn-icon' ? <BookmarkOutlineIcon className={buttonIconClassName} /> : <BookmarkIcon className={buttonIconClassName} />}
+                <div className="btn-text">{buttonText}</div>
+              </div>
+            </span>
+          </button>
+        </div>
+      </div>
+    </Fragment>
       );
 };
 

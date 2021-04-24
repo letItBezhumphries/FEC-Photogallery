@@ -7,6 +7,7 @@ const getRequestURL = () => {
   } else if (process.env.NODE_ENV === 'development') {
     RESTAURANT_API_URL = process.env.DEV_REQUEST_URL;
   }
+  console.log('API_URL:', RESTAURANT_API_URL);
   return RESTAURANT_API_URL;
 };
 

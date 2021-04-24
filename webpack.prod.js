@@ -1,9 +1,9 @@
 const path = require('path');
 const glob = require("glob");
 const { merge } = require('webpack-merge');
-const PurgeCSSPlugin = require("purgecss-webpack-plugin");
+// const PurgeCSSPlugin = require("purgecss-webpack-plugin");
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
+// const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const Dotenv = require('dotenv-webpack');
@@ -11,21 +11,20 @@ const ESLintPlugin = require('eslint-webpack-plugin');
 const { ModuleFederationPlugin } = require("webpack").container;
 const commonConfig = require('./webpack.common');
 const DIST_DIR = path.join(__dirname, '/public/dist');
-const ALL_FILES = glob.sync(path.join(__dirname, "client/src/*.js"));
+// const ALL_FILES = glob.sync(path.join(__dirname, "client/src/*.js"));
 const packageJson = require('./package.json');
 const TerserPlugin = require('terser-webpack-plugin');
 
 const prodConfig = {
   mode: 'production',
-  devtool: {
-    type: "source-map"
-  },
   output: {
     filename: 'bundle.[contenthash].js',
     path: DIST_DIR,
-    publicPath: 'http://localhost:3003/',
+    publicPath: "/photogallery/latest/",
+    // publicPath: 'http://localhost:3003/',
     assetModuleFilename: 'assets/[name][contenthash][ext]'
   },
+  devtool: "source-map",
   module: {
     rules: [
       {
@@ -75,7 +74,7 @@ const prodConfig = {
       filename: 'photogallery.html'
     }),
     new Dotenv({
-      path: './.env.development',
+      path: './.env',
       allowEmptyValues: true
     }),
     new ESLintPlugin({
@@ -90,27 +89,27 @@ const prodConfig = {
       },
       shared: packageJson.dependencies,
     }),
-    new PurgeCSSPlugin({
-      paths: ALL_FILES,
-      extractors: [
-        {
-          extractor: (content) => content.match(/[^<>"'`\s]*[^<>"'`\s:]/g) || [],
-          extensions: ["html"],
-        },
-      ],
-    }),
+    // new PurgeCSSPlugin({
+    //   paths: ALL_FILES,
+    //   extractors: [
+    //     {
+    //       extractor: (content) => content.match(/[^<>"'`\s]*[^<>"'`\s:]/g) || [],
+    //       extensions: ["html"],
+    //     },
+    //   ],
+    // }),
   ],
-  optimization: { 
-    minimizer: [
-      new TerserPlugin(),
-      new CssMinimizerPlugin({
-        minimizerOptions: { preset: ["default"] },
-      }),
-    ],
-    splitChunks: {
-      chunks: "all",
-    },
-  }, 
+  // optimization: { 
+  //   minimizer: [
+  //     new TerserPlugin(),
+  //     new CssMinimizerPlugin({
+  //       minimizerOptions: { preset: ["default"] },
+  //     }),
+  //   ],
+  //   splitChunks: {
+  //     chunks: "all",
+  //   },
+  // }, 
 };
 
 module.exports = merge(commonConfig, prodConfig);
