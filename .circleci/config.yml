@@ -7,9 +7,6 @@ executors:
   terraform-executor:
     docker:
       - image: hashicorp/terraform:0.14.3
-  packer-executor:
-    docker:
-      - image: hashicorp/packer:1.7.0
 
 aliases:
   - &show-current-branch-name
@@ -95,30 +92,6 @@ jobs:
       - run:
           name: Run prettier check
           command: npm run prettier:check
-
-  packer-build-aws-ami:
-    executor: packer-executor
-    steps:
-      - checkout
-      - attach_workspace:
-          at: ./
-      - *show-current-branch-name
-      - add_ssh_keys:
-          fingerprints:
-            - MD5:b7:c2:bd:7a:e1:2f:9b:91:f8:35:69:73:80:f4:8e:ce
-      - run:
-          name: Packer build AWS ami
-          command: |
-            cd infrastructure/
-            ARTIFACT=$(packer build -machine-readable photogallery-packer.json | awk -F, '$0 ~/artifact,0,id/ {print $6}')
-            echo $ARTIFACT
-            AMI_ID=$(echo $ARTIFACT | cut -d ':' -f2)
-            echo $AMI_ID
-            echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > amivar.tf
-      - persist_to_workspace:
-          root: ./
-          paths:
-            - artifacts
 
   terraform-validate:
     executor: terraform-executor
@@ -248,15 +221,6 @@ workflows:
           requires:
             - linting
             - prettier
-          filters:
-            branches:
-              only:
-                - develop
-                - staging
-                - master
-      - packer-build-aws-ami:
-          requires:
-            - terraform-validate
           filters:
             branches:
               only:

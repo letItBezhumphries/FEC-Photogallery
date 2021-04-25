@@ -52,7 +52,7 @@ const devConfig = {
       filename: 'photogallery.html'
     }),
     new Dotenv({
-      path: './.env.development',
+      path: './.env',
       allowEmptyValues: true
     }),
     new ESLintPlugin({
