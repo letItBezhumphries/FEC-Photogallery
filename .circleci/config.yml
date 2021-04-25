@@ -229,7 +229,7 @@ workflows:
                 - master
       - terraform-plan-and-apply:
           requires:
-            - packer-build-aws-ami
+            - terraform-validate
           filters:
             branches:
               only:
