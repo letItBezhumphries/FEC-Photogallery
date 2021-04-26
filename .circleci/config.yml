@@ -49,15 +49,6 @@ aliases:
         cd public/dist
         zip ../dist.zip -r * .[^.]*
         echo "Build successful"
-  - &install-packer
-    run:
-      name: Install Packer
-      command: |
-        sudo apt-get -y -qq update
-        sudo apt-get install -y sshd
-        curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
-        sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
-        sudo apt-get update && sudo apt-get install packer
 
 jobs:
   build:
@@ -95,41 +86,6 @@ jobs:
       - run:
           name: Run prettier check
           command: npm run prettier:check
-
-  packer-validate:
-    executor: packer-executor
-    steps:
-      - checkout
-      - attach_workspace:
-          at: ./
-      - *show-current-branch-name
-      - add_ssh_keys:
-          fingerprints:
-            - b7:c2:bd:7a:e1:2f:9b:91:f8:35:69:73:80:f4:8e:ce
-      - run:
-          name: Packer validate template file
-          command: |
-            cd artifacts/infrastructure/
-            packer validate photogallery-packer.json
-
-  packer-build-ami:
-    executor: packer-executor
-    steps:
-      - checkout
-      - attach_workspace:
-          at: ./
-      - *show-current-branch-name
-      - run:
-          name: Packer build ami on aws
-          command: |
-            cd artifacts/infrastructure/
-            echo LIST=$(ls) > listOfFiles.txt
-            echo $LIST
-          no_output_timeout: 10m
-      - persist_to_workspace:
-          root: ./
-          paths:
-            - artifacts
 
   terraform-validate:
     executor: terraform-executor
@@ -255,7 +211,7 @@ workflows:
                 - develop
                 - staging
                 - master
-      - packer-validate:
+      - terraform-validate:
           requires:
             - linting
             - prettier
@@ -265,62 +221,43 @@ workflows:
                 - develop
                 - staging
                 - master
-      - packer-build-ami:
+      - terraform-plan-and-apply:
           requires:
-            - packer-validate
+            - terraform-validate
           filters:
             branches:
               only:
                 - develop
                 - staging
                 - master
-      # - terraform-validate:
-      #     requires:
-      #       - linting
-      #       - prettier
-      #     filters:
-      #       branches:
-      #         only:
-      #           - develop
-      #           - staging
-      #           - master
-      # - terraform-plan-and-apply:
-      #     requires:
-      #       - terraform-validate
-      #     filters:
-      #       branches:
-      #         only:
-      #           - develop
-      #           - staging
-      #           - master
-      # - deploy-to-aws-s3:
-      #     requires:
-      #       - terraform-plan-and-apply
-      #     filters:
-      #       branches:
-      #         only:
-      #           - develop
-      #           - staging
-      #           - master
-      # - deploy-to-aws-cloudfront:
-      #     requires:
-      #       - deploy-to-aws-s3
-      #     filters:
-      #       branches:
-      #         only:
-      #           - develop
-      #           - staging
-      #           - master
-      # - hold:
-      #     type: approval
-      #     requires:
-      #       - deploy-to-aws-cloudfront
-      # - terraform-destroy:
-      #     requires:
-      #       - hold
-      #     filters:
-      #       branches:
-      #         only:
-      #           - develop
-      #           - staging
-      #           - master
+      - deploy-to-aws-s3:
+          requires:
+            - terraform-plan-and-apply
+          filters:
+            branches:
+              only:
+                - develop
+                - staging
+                - master
+      - deploy-to-aws-cloudfront:
+          requires:
+            - deploy-to-aws-s3
+          filters:
+            branches:
+              only:
+                - develop
+                - staging
+                - master
+      - hold:
+          type: approval
+          requires:
+            - deploy-to-aws-cloudfront
+      - terraform-destroy:
+          requires:
+            - hold
+          filters:
+            branches:
+              only:
+                - develop
+                - staging
+                - master
