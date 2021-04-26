@@ -7,6 +7,9 @@ executors:
   terraform-executor:
     docker:
       - image: hashicorp/terraform:0.14.3
+  packer-executor:
+    docker:
+      - image: hashicorp/packer:1.7.2
 
 aliases:
   - &show-current-branch-name
@@ -92,6 +95,39 @@ jobs:
       - run:
           name: Run prettier check
           command: npm run prettier:check
+
+  packer-validate:
+    executor: packer-executor
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - *show-current-branch-name
+      - run:
+          name: Packer validate template file
+          command: |
+            cd artifacts/infrastructure/
+            ssh-keygen -f mykey
+            packer validate photogallery-packer.json
+
+  packer-build-ami:
+    executor: packer-executor
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - *show-current-branch-name
+      - run:
+          name: Packer build ami on aws
+          command: |
+            cd artifacts/infrastructure/
+            ARTIFACT=`packer build -machine-readable photogallery-packer.json |awk -F, '$0 ~/artifact,0,id/ {print $6}'`
+            AMI_ID=`echo $ARTIFACT | cut -d ':' -f2`
+            echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > amivar.tf
+      - persist_to_workspace:
+          root: ./
+          paths:
+            - artifacts
 
   terraform-validate:
     executor: terraform-executor
@@ -217,7 +253,7 @@ workflows:
                 - develop
                 - staging
                 - master
-      - terraform-validate:
+      - packer-validate:
           requires:
             - linting
             - prettier
@@ -227,43 +263,62 @@ workflows:
                 - develop
                 - staging
                 - master
-      - terraform-plan-and-apply:
+      - packer-build-ami:
           requires:
-            - terraform-validate
+            - packer-validate
           filters:
             branches:
               only:
                 - develop
                 - staging
                 - master
-      - deploy-to-aws-s3:
-          requires:
-            - terraform-plan-and-apply
-          filters:
-            branches:
-              only:
-                - develop
-                - staging
-                - master
-      - deploy-to-aws-cloudfront:
-          requires:
-            - deploy-to-aws-s3
-          filters:
-            branches:
-              only:
-                - develop
-                - staging
-                - master
-      - hold:
-          type: approval
-          requires:
-            - deploy-to-aws-cloudfront
-      - terraform-destroy:
-          requires:
-            - hold
-          filters:
-            branches:
-              only:
-                - develop
-                - staging
-                - master
+      # - terraform-validate:
+      #     requires:
+      #       - linting
+      #       - prettier
+      #     filters:
+      #       branches:
+      #         only:
+      #           - develop
+      #           - staging
+      #           - master
+      # - terraform-plan-and-apply:
+      #     requires:
+      #       - terraform-validate
+      #     filters:
+      #       branches:
+      #         only:
+      #           - develop
+      #           - staging
+      #           - master
+      # - deploy-to-aws-s3:
+      #     requires:
+      #       - terraform-plan-and-apply
+      #     filters:
+      #       branches:
+      #         only:
+      #           - develop
+      #           - staging
+      #           - master
+      # - deploy-to-aws-cloudfront:
+      #     requires:
+      #       - deploy-to-aws-s3
+      #     filters:
+      #       branches:
+      #         only:
+      #           - develop
+      #           - staging
+      #           - master
+      # - hold:
+      #     type: approval
+      #     requires:
+      #       - deploy-to-aws-cloudfront
+      # - terraform-destroy:
+      #     requires:
+      #       - hold
+      #     filters:
+      #       branches:
+      #         only:
+      #           - develop
+      #           - staging
+      #           - master
