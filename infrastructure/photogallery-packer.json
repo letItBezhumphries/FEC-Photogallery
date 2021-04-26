@@ -26,11 +26,6 @@
   ],
   "provisioners": [
     {
-      "type": "file",
-      "source": "./mykey.pub",
-      "destination": "/tmp/mykey.pub"
-    },
-    {
       "type": "shell",
       "scripts": ["boot-scripts/install_software.sh"],
       "execute_command": "{{ .Vars }} sudo -E sh '{{ .Path }}'",
