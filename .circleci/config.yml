@@ -123,7 +123,9 @@ jobs:
           name: Packer build ami on aws
           command: |
             cd artifacts/infrastructure/
-            build-and-lauch.sh
+            ARTIFACT=`packer build -machine-readable photogallery-packer.json |awk -F, '$0 ~/artifact,0,id/ {print $6}'`
+            AMI_ID=`echo $ARTIFACT | cut -d ':' -f2`
+            echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > amivar.tf
           no_output_timeout: 10m
       - persist_to_workspace:
           root: ./
