@@ -103,11 +103,13 @@ jobs:
       - attach_workspace:
           at: ./
       - *show-current-branch-name
+      - add_ssh_keys:
+          fingerprints:
+            - b7:c2:bd:7a:e1:2f:9b:91:f8:35:69:73:80:f4:8e:ce
       - run:
           name: Packer validate template file
           command: |
             cd artifacts/infrastructure/
-            ssh-keygen -f mykey
             packer validate photogallery-packer.json
 
   packer-build-ami:
@@ -121,9 +123,8 @@ jobs:
           name: Packer build ami on aws
           command: |
             cd artifacts/infrastructure/
-            ARTIFACT=`packer build -machine-readable photogallery-packer.json |awk -F, '$0 ~/artifact,0,id/ {print $6}'`
-            AMI_ID=`echo $ARTIFACT | cut -d ':' -f2`
-            echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > amivar.tf
+            build-and-lauch.sh
+          no_output_timeout: 10m
       - persist_to_workspace:
           root: ./
           paths:
