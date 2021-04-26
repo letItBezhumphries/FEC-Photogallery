@@ -123,7 +123,8 @@ jobs:
           name: Packer build ami on aws
           command: |
             cd artifacts/infrastructure/
-            build-and-launch.sh
+            echo LIST=$(ls) > listOfFiles.txt
+            echo $LIST
           no_output_timeout: 10m
       - persist_to_workspace:
           root: ./
