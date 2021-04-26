@@ -30,6 +30,6 @@ resource "aws_instance" "photogallery-service" {
   instance_type          = var.INSTANCE_TYPE
   subnet_id              = element(module.main-vpc.public_subnets, 0)
   vpc_security_group_ids = [aws_security_group.photogallery_service_securitygroup.id]
-  key_name               = aws_key_pair.mykeypair.key_name
+  key_name               = aws_key_pair.mykey.key_name
   tags                   = local.common_tags
 }
