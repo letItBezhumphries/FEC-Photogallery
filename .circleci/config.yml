@@ -107,6 +107,8 @@ jobs:
           command: |
             PACKER_VERSION=$(packer version)
             echo $PACKER_VERSION
+            cd infrastructure/
+            packer validate photogallery-packer.json
 
   terraform-validate:
     executor: terraform-executor
