@@ -110,6 +110,26 @@ jobs:
             cd infrastructure/
             packer validate photogallery-packer.json
 
+  packer-build-ami:
+    executor: terraform-executor
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - *show-current-branch-name
+      - *install-packer
+      - run:
+          name: Packer build ami
+          command: |
+            PACKER_VERSION=$(packer version)
+            echo $PACKER_VERSION
+            cd infrastructure/
+            ARTIFACT=$(packer build -machine-readable photogallery-packer.json | awk -F, '$0 ~/artifact,0,id/ {print $6}')
+            AMI_ID=$(echo $ARTIFACT | cut -d ':' -f2)
+            echo $ARTIFACT
+            echo $AMI_ID
+            echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > amivar.tf
+
   terraform-validate:
     executor: terraform-executor
     steps:
@@ -245,9 +265,18 @@ workflows:
                 - develop
                 - staging
                 - master
-      - terraform-validate:
+      - packer-build-ami:
           requires:
             - packer-validate
+          filters:
+            branches:
+              only:
+                - develop
+                - staging
+                - master
+      - terraform-validate:
+          requires:
+            - packer-build-ami
             # - linting
             # - prettier
           filters:
