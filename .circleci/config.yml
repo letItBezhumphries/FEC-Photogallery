@@ -49,6 +49,13 @@ aliases:
         cd public/dist
         zip ../dist.zip -r * .[^.]*
         echo "Build successful"
+  - &install-packer
+    run:
+      name: Install packer
+      command: |
+        wget -q https://releases.hashicorp.com/packer/1.6.2/packer_1.6.2_linux_amd64.zip
+        unzip -o packer_1.6.2_linux_amd64.zip -d /usr/local/bin
+        rm packer_1.6.2_linux_amd64.zip
 
 jobs:
   build:
@@ -87,6 +94,20 @@ jobs:
           name: Run prettier check
           command: npm run prettier:check
 
+  packer-validate:
+    executor: terraform-executor
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - *show-current-branch-name
+      - *install-packer
+      - run:
+          name: Check Packer version
+          command: |
+            PACKER_VERSION=$(packer version)
+            echo $PACKER_VERSION
+
   terraform-validate:
     executor: terraform-executor
     steps:
@@ -120,6 +141,7 @@ jobs:
             cd artifacts/infrastructure/
             terraform workspace select ${CIRCLE_BRANCH}
             terraform apply --auto-approve
+            terraform output photogallery_service_ip_address > ../photogallery_service_ip_address.txt
             terraform output photogallery_bucket_name > ../photogallery_bucket_name.txt
             terraform output photogallery_cloudfront_distribution_id > ../photogallery_cloudfront_distribution_id.txt
       - persist_to_workspace:
@@ -211,10 +233,21 @@ workflows:
                 - develop
                 - staging
                 - master
-      - terraform-validate:
+      - packer-validate:
           requires:
             - linting
             - prettier
+          filters:
+            branches:
+              only:
+                - develop
+                - staging
+                - master
+      - terraform-validate:
+          requires:
+            - packer-validate
+            # - linting
+            # - prettier
           filters:
             branches:
               only:
