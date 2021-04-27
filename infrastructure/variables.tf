@@ -16,17 +16,11 @@ variable "project" {
 
 # variable "host" {}
 
-variable "AMI_ID" {
-  default = "ami-095deda8719c51663"
-}
+# variable "AMI_ID" {}
 
 variable "PATH_TO_PUBLIC_KEY" {
   default = "mykey.pub"
 }
-
-# variable "PATH_TO_PRIVATE_KEY" {
-#   default = "mykey"
-# }
 
 variable "INSTANCE_TYPE" {
   default = "t2.micro"

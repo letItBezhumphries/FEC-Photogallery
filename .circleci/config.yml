@@ -7,9 +7,6 @@ executors:
   terraform-executor:
     docker:
       - image: hashicorp/terraform:0.14.3
-  packer-executor:
-    docker:
-      - image: hashicorp/packer:1.7.2
 
 aliases:
   - &show-current-branch-name
@@ -129,6 +126,12 @@ jobs:
             echo $ARTIFACT
             echo $AMI_ID
             echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > amivar.tf
+            RESULTS=$(cat amivar.tf)
+            echo $RESULTS
+      - persist_to_workspace:
+          root: ./
+          paths:
+            - artifacts
 
   terraform-validate:
     executor: terraform-executor
