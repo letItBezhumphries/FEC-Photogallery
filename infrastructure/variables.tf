@@ -17,7 +17,7 @@ variable "project" {
 # variable "host" {}
 
 variable "AMI_ID" {
-  default = "ami-095deda8719c5166"
+  default = "ami-095deda8719c51663"
 }
 
 variable "PATH_TO_PUBLIC_KEY" {
