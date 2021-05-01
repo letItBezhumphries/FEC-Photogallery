@@ -121,8 +121,7 @@ jobs:
             cd infrastructure/
             ARTIFACT=$(packer build -machine-readable photogallery-packer.json | awk -F, '$0 ~/artifact,0,id/ {print $6}')
             echo 'export AMI_ID=$(echo $ARTIFACT | cut -d ":" -f2)' >> $BASH_ENV
-            echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > amivar.tf
-            cp infrastructure/amivar.tf artifacts/infrastructure/
+            echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > artifacts/infrastructure/amivar.tf
       - run:
           name: Check custom environment variable
           command: echo ${AMI_ID}
