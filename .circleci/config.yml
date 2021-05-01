@@ -129,8 +129,6 @@ jobs:
     executor: terraform-executor
     steps:
       - checkout
-      - attach_workspace:
-          at: ./
       - *show-current-branch-name
       - run:
           name: Terraform validate & format
