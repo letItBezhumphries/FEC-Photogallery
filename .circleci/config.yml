@@ -111,7 +111,6 @@ jobs:
       - checkout
       - *show-current-branch-name
       - *install-packer
-      - working_directory: /infrastructure
       - run:
           name: Packer build ami
           command: |
