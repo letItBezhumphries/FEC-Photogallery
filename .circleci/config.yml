@@ -120,10 +120,12 @@ jobs:
           command: |
             cd infrastructure/
             ARTIFACT=$(packer build -machine-readable photogallery-packer.json | awk -F, '$0 ~/artifact,0,id/ {print $6}')
-            AMI_ID=$(echo $ARTIFACT | cut -d ':' -f2)
+            echo 'export AMI_ID=$(echo $ARTIFACT | cut -d ":" -f2)' >> $BASH_ENV
             echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > amivar.tf
-            RESULTS=$(cat amivar.tf)
-            echo $RESULTS
+            cp infrastructure/amivar.tf artifacts/infrastructure/
+      - run:
+          name: Check custom environment variable
+          command: echo ${AMI_ID}
       - persist_to_workspace:
           root: ./
           paths:
@@ -286,43 +288,43 @@ workflows:
                 - develop
                 - staging
                 - master
-      - terraform-plan-and-apply:
-          requires:
-            - terraform-validate
-          filters:
-            branches:
-              only:
-                - develop
-                - staging
-                - master
-      - deploy-to-aws-s3:
-          requires:
-            - terraform-plan-and-apply
-          filters:
-            branches:
-              only:
-                - develop
-                - staging
-                - master
-      - deploy-to-aws-cloudfront:
-          requires:
-            - deploy-to-aws-s3
-          filters:
-            branches:
-              only:
-                - develop
-                - staging
-                - master
-      - hold:
-          type: approval
-          requires:
-            - deploy-to-aws-cloudfront
-      - terraform-destroy:
-          requires:
-            - hold
-          filters:
-            branches:
-              only:
-                - develop
-                - staging
-                - master
+      # - terraform-plan-and-apply:
+      #     requires:
+      #       - terraform-validate
+      #     filters:
+      #       branches:
+      #         only:
+      #           - develop
+      #           - staging
+      #           - master
+      # - deploy-to-aws-s3:
+      #     requires:
+      #       - terraform-plan-and-apply
+      #     filters:
+      #       branches:
+      #         only:
+      #           - develop
+      #           - staging
+      #           - master
+      # - deploy-to-aws-cloudfront:
+      #     requires:
+      #       - deploy-to-aws-s3
+      #     filters:
+      #       branches:
+      #         only:
+      #           - develop
+      #           - staging
+      #           - master
+      # - hold:
+      #     type: approval
+      #     requires:
+      #       - deploy-to-aws-cloudfront
+      # - terraform-destroy:
+      #     requires:
+      #       - hold
+      #     filters:
+      #       branches:
+      #         only:
+      #           - develop
+      #           - staging
+      #           - master
