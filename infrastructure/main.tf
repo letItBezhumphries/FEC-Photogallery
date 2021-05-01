@@ -32,12 +32,12 @@ resource "aws_instance" "photogallery-service" {
   vpc_security_group_ids = [aws_security_group.photogallery_service_securitygroup.id]
   key_name               = aws_key_pair.mykeypair.key_name
   # User-data
-  user_data              = data.template_cloudinit_config.cloudinit-install-script.rendered
+  # user_data              = data.template_cloudinit_config.cloudinit-install-script.rendered
   
-  root_block_device {
-    volume_size = "10"
-    volume_type = "standard"
-  }
+  # root_block_device {
+  #   volume_size = "10"
+  #   volume_type = "standard"
+  # }
 
   tags                   = local.common_tags
 
