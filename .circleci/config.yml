@@ -122,7 +122,7 @@ jobs:
           name: Check custom environment variable
           command: echo ${AMI_ID}
       - store_artifacts:
-          path: /infrastructure/amivar.tf
+          path: ./amivar.tf
 
   terraform-validate:
     executor: terraform-executor
