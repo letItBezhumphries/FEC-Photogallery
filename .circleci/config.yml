@@ -95,8 +95,6 @@ jobs:
     executor: terraform-executor
     steps:
       - checkout
-      - attach_workspace:
-          at: ./
       - *show-current-branch-name
       - *install-packer
       - run:
@@ -113,20 +111,19 @@ jobs:
       - checkout
       - *show-current-branch-name
       - *install-packer
+      - working_directory: /infrastructure
       - run:
           name: Packer build ami
           command: |
             cd infrastructure/
             ARTIFACT=$(packer build -machine-readable photogallery-packer.json | awk -F, '$0 ~/artifact,0,id/ {print $6}')
             echo 'export AMI_ID=$(echo $ARTIFACT | cut -d ":" -f2)' >> $BASH_ENV
-            echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > infrastructure/amivar.tf
+            echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > amivar.tf
       - run:
           name: Check custom environment variable
           command: echo ${AMI_ID}
-      - persist_to_workspace:
-          root: ./
-          paths:
-            - artifacts
+      - store_artifacts:
+          path: /infrastructure/amivar.tf
 
   terraform-validate:
     executor: terraform-executor
