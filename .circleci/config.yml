@@ -117,13 +117,13 @@ jobs:
             cd infrastructure/
             ARTIFACT=$(packer build -machine-readable photogallery-packer.json | awk -F, '$0 ~/artifact,0,id/ {print $6}');
             echo 'export AMI_ID=$(echo $ARTIFACT | cut -d ":" -f2)' >> $BASH_ENV;
-            mkdir /tmp/artifacts;
-            echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > /tmp/artifacts/amivar.tf;
-      - run:
-          name: Check custom environment variable
-          command: echo ${AMI_ID}
-      - store_artifacts:
-          path: /tmp/artifacts
+      #       mkdir /tmp/artifacts;
+      #       echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > /tmp/artifacts/amivar.tf;
+      # - run:
+      #     name: Check custom environment variable
+      #     command: echo ${AMI_ID}
+      # - store_artifacts:
+      #     path: /tmp/artifacts
 
   terraform-validate:
     executor: terraform-executor
@@ -151,16 +151,19 @@ jobs:
             cd artifacts/infrastructure/
             terraform init
             terraform workspace select ${CIRCLE_BRANCH} || terraform workspace new ${CIRCLE_BRANCH}
-            terraform plan
+            terraform plan -var 'AMI_ID=${AMI_ID}'
       - run:
           name: Terraform Apply
           command: |
             cd artifacts/infrastructure/
             terraform workspace select ${CIRCLE_BRANCH}
-            terraform apply --auto-approve
+            echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > amivar.tf;
+            terraform apply -var 'AMI_ID=${AMI_ID}' --auto-approve;
+            echo 'export PHOTOGALLERY_IP=$(terraform output photogallery_service_ip_address)' >> $BASH_ENV;
             terraform output photogallery_service_ip_address > ../photogallery_service_ip_address.txt
             terraform output photogallery_bucket_name > ../photogallery_bucket_name.txt
             terraform output photogallery_cloudfront_distribution_id > ../photogallery_cloudfront_distribution_id.txt
+            echo ${PHOTOGALLERY_IP}
       - persist_to_workspace:
           root: ./
           paths:
@@ -280,43 +283,43 @@ workflows:
                 - develop
                 - staging
                 - master
-      # - terraform-plan-and-apply:
-      #     requires:
-      #       - terraform-validate
-      #     filters:
-      #       branches:
-      #         only:
-      #           - develop
-      #           - staging
-      #           - master
-      # - deploy-to-aws-s3:
-      #     requires:
-      #       - terraform-plan-and-apply
-      #     filters:
-      #       branches:
-      #         only:
-      #           - develop
-      #           - staging
-      #           - master
-      # - deploy-to-aws-cloudfront:
-      #     requires:
-      #       - deploy-to-aws-s3
-      #     filters:
-      #       branches:
-      #         only:
-      #           - develop
-      #           - staging
-      #           - master
-      # - hold:
-      #     type: approval
-      #     requires:
-      #       - deploy-to-aws-cloudfront
-      # - terraform-destroy:
-      #     requires:
-      #       - hold
-      #     filters:
-      #       branches:
-      #         only:
-      #           - develop
-      #           - staging
-      #           - master
+      - terraform-plan-and-apply:
+          requires:
+            - terraform-validate
+          filters:
+            branches:
+              only:
+                - develop
+                - staging
+                - master
+      - deploy-to-aws-s3:
+          requires:
+            - terraform-plan-and-apply
+          filters:
+            branches:
+              only:
+                - develop
+                - staging
+                - master
+      - deploy-to-aws-cloudfront:
+          requires:
+            - deploy-to-aws-s3
+          filters:
+            branches:
+              only:
+                - develop
+                - staging
+                - master
+      - hold:
+          type: approval
+          requires:
+            - deploy-to-aws-cloudfront
+      - terraform-destroy:
+          requires:
+            - hold
+          filters:
+            branches:
+              only:
+                - develop
+                - staging
+                - master
