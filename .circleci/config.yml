@@ -53,6 +53,10 @@ aliases:
         wget -q https://releases.hashicorp.com/packer/1.6.2/packer_1.6.2_linux_amd64.zip
         unzip -o packer_1.6.2_linux_amd64.zip -d /usr/local/bin
         rm packer_1.6.2_linux_amd64.zip
+  - &print-ami-id
+    run:
+      name: Print AMI_ID
+      command: echo ${AMI_ID}
 
 jobs:
   build:
@@ -100,8 +104,6 @@ jobs:
       - run:
           name: Check Packer version
           command: |
-            PACKER_VERSION=$(packer version)
-            echo $PACKER_VERSION
             cd infrastructure/
             packer validate photogallery-packer.json
 
@@ -115,14 +117,19 @@ jobs:
           name: Packer build ami
           command: |
             cd infrastructure/
-            ARTIFACT=$(packer build -machine-readable photogallery-packer.json | awk -F, '$0 ~/artifact,0,id/ {print $6}');
-            echo 'export AMI_ID=$(echo $ARTIFACT | cut -d ":" -f2)' >> $BASH_ENV;
-            echo 'this is the artifact:';
-            echo ${ARTIFACT};
-            echo 'this is the ami id:'; 
-            echo ${AMI_ID};
+            ARTIFACT=$(packer build -machine-readable photogallery-packer.json | awk -F, '$0 ~/artifact,0,id/ {print $6}')
+            AMI_ID=$(`echo ${ARTIFACT} | cut -d ':' -f2`)
+            echo `export AMI_ID=$(echo ${ARTIFACT} | cut -d ":" -f2)` >> $BASH_ENV
+            source $BASH_ENV
           environment:
             AMI_ID: $AMI_ID
+      - run:
+          name: Print the Artifact
+          command: echo ${ARTIFACT}
+      - run:
+          name: Print the AMI_ID
+          command: echo ${AMI_ID}
+
       #       mkdir /tmp/artifacts;
       #       echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > /tmp/artifacts/amivar.tf;
       # - run:
@@ -136,12 +143,11 @@ jobs:
     steps:
       - checkout
       - *show-current-branch-name
+      - *print-ami-id
       - run:
           name: Terraform validate & format
           command: |
             cd infrastructure/
-            echo 'this is the ami id:'; 
-            echo ${AMI_ID};
             echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > amivar.tf;
             terraform init -backend=false
             terraform validate
@@ -154,14 +160,13 @@ jobs:
       - attach_workspace:
           at: ./
       - *show-current-branch-name
+      - *print-ami-id
       - run:
           name: Terraform Plan
           command: |
             cd artifacts/infrastructure/
             terraform init
             terraform workspace select ${CIRCLE_BRANCH} || terraform workspace new ${CIRCLE_BRANCH}
-            echo 'this is the ami id:' 
-            echo ${AMI_ID}
             echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > amivar.tf;
             terraform plan
       - run:
@@ -169,10 +174,10 @@ jobs:
           command: |
             cd artifacts/infrastructure/
             terraform workspace select ${CIRCLE_BRANCH}
-            echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > amivar.tf;
-            cat amivar.tf;
-            terraform apply --auto-approve;
-            echo 'export PHOTOGALLERY_IP=$(terraform output photogallery_service_ip_address)' >> $BASH_ENV;
+            echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > amivar.tf
+            cat amivar.tf
+            terraform apply --auto-approve
+            echo 'export PHOTOGALLERY_IP=$(terraform output photogallery_service_ip_address)' >> $BASH_ENV
             terraform output photogallery_service_ip_address > ../photogallery_service_ip_address.txt
             terraform output photogallery_bucket_name > ../photogallery_bucket_name.txt
             terraform output photogallery_cloudfront_distribution_id > ../photogallery_cloudfront_distribution_id.txt
