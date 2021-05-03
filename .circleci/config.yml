@@ -160,6 +160,7 @@ jobs:
             cd artifacts/infrastructure/
             terraform workspace select ${CIRCLE_BRANCH}
             echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > amivar.tf;
+            cat amivar.tf;
             terraform apply --auto-approve;
             echo 'export PHOTOGALLERY_IP=$(terraform output photogallery_service_ip_address)' >> $BASH_ENV;
             terraform output photogallery_service_ip_address > ../photogallery_service_ip_address.txt
