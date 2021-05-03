@@ -117,8 +117,10 @@ jobs:
             cd infrastructure/
             ARTIFACT=$(packer build -machine-readable photogallery-packer.json | awk -F, '$0 ~/artifact,0,id/ {print $6}');
             echo 'export AMI_ID=$(echo $ARTIFACT | cut -d ":" -f2)' >> $BASH_ENV;
-            echo ${ARTIFACT};
-            echo ${AMI_ID};
+            echo 'this is the artifact: ${ARTIFACT}';
+            echo 'this is the ami id: ${AMI_ID}';
+          environment:
+            AMI_ID: $AMI_ID
       #       mkdir /tmp/artifacts;
       #       echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > /tmp/artifacts/amivar.tf;
       # - run:
@@ -136,6 +138,7 @@ jobs:
           name: Terraform validate & format
           command: |
             cd infrastructure/
+            echo 'this is the ami id: ${AMI_ID}';
             echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > amivar.tf;
             terraform init -backend=false
             terraform validate
@@ -154,6 +157,7 @@ jobs:
             cd artifacts/infrastructure/
             terraform init
             terraform workspace select ${CIRCLE_BRANCH} || terraform workspace new ${CIRCLE_BRANCH}
+            echo 'this is the ami id: ${AMI_ID}';
             echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > amivar.tf;
             terraform plan
       - run:
