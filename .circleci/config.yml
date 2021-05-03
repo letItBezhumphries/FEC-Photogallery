@@ -152,7 +152,8 @@ jobs:
             cd artifacts/infrastructure/
             terraform init
             terraform workspace select ${CIRCLE_BRANCH} || terraform workspace new ${CIRCLE_BRANCH}
-            terraform plan -var 'AMI_ID=${AMI_ID}'
+            echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > amivar.tf;
+            terraform plan
       - run:
           name: Terraform Apply
           command: |

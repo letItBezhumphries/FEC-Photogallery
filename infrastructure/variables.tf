@@ -17,8 +17,6 @@ variable "project" {
 # variable "host" {}
 
 
-variable "AMI_ID" {}
-
 variable "PATH_TO_PUBLIC_KEY" {
   default = "mykey.pub"
 }
