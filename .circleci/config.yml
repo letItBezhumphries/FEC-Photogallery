@@ -119,7 +119,9 @@ jobs:
             cd infrastructure/
             ARTIFACT=$(packer build -machine-readable photogallery-packer.json | awk -F, '$0 ~/artifact,0,id/ {print $6}')
             AMI_ID=$(`echo ${ARTIFACT} | cut -d ':' -f2`)
-            echo 'export AMI_ID=$(echo ${ARTIFACT} | cut -d ":" -f2)' >> $BASH_ENV
+            echo $AMI_ID
+            echo $ARTIFACT
+          #  echo 'export AMI_ID=$(echo ${ARTIFACT} | cut -d ":" -f2)' >> $BASH_ENV
           # environment:
           #   AMI_ID: $AMI_ID
 
