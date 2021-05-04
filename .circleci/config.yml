@@ -121,17 +121,17 @@ jobs:
             echo $ARTIFACT;
             echo 'export AMI_ID=$(echo $ARTIFACT | cut -d ":" -f2)' >> $BASH_ENV;
             source $BASH_ENV;
-            echo $AMI_ID
-          environment:
-            AMI_ID: $AMI_ID
-
-      #       mkdir /tmp/artifacts;
-      #       echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > /tmp/artifacts/amivar.tf;
-      # - run:
-      #     name: Check custom environment variable
-      #     command: echo ${AMI_ID}
-      # - store_artifacts:
-      #     path: /tmp/artifacts
+            echo ${AMI_ID}
+      - run:
+          name: Creating artifact amivar.tf file
+          command: |
+            mkdir /tmp/artifacts;
+            echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > /tmp/artifacts/amivar.tf;
+      - run:
+          name: Check custom environment variable
+          command: echo ${AMI_ID}
+      - store_artifacts:
+          path: /tmp/artifacts
 
   terraform-validate:
     executor: terraform-executor
