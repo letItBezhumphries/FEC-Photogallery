@@ -7,38 +7,6 @@ executors:
   terraform-executor:
     docker:
       - image: hashicorp/terraform:0.14.3
-    working_directory: ~/photos-repo
-    steps:
-      - checkout
-      - attach_workspace:
-          at: ./
-      - run:
-          name: Install packer
-          command: |
-            wget -q https://releases.hashicorp.com/packer/1.6.2/packer_1.6.2_linux_amd64.zip
-            unzip -o packer_1.6.2_linux_amd64.zip -d /usr/local/bin
-            rm packer_1.6.2_linux_amd64.zip
-      - run:
-          name: packer build ami if tmp file does not exist
-          command: |
-            [[ ! -f /tmp/artifacts/amivar.tf ]]
-            then
-              cd /infrastructure
-              ARTIFACT=$(packer build -machine-readable photogallery-packer.json | awk -F, '$0 ~/artifact,0,id/ {print $6}')
-              echo 'export AMI_ID=$(echo $ARTIFACT | cut -d ":" -f2)' >> $BASH_ENV;
-              source $BASH_ENV;
-              mkdir /tmp/artifacts;
-              echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > /tmp/artifacts/amivar.tf;
-            fi
-      - run:
-          name: Check amivar.tf contents
-          command: cat /tmp/artifacts/amivar.tf
-      - store_artifacts:
-          path: /tmp/artifacts
-      - persist_to_workspace:
-          root: ./
-          paths:
-            - /tmp/artifacts/amivar.tf
 
 aliases:
   - &show-current-branch-name
@@ -78,17 +46,17 @@ aliases:
         cd public/dist
         zip ../dist.zip -r * .[^.]*
         echo "Build successful"
-  # - &install-packer
-  #   run:
-  #     name: Install packer
-  #     command: |
-  #       wget -q https://releases.hashicorp.com/packer/1.6.2/packer_1.6.2_linux_amd64.zip
-  #       unzip -o packer_1.6.2_linux_amd64.zip -d /usr/local/bin
-  #       rm packer_1.6.2_linux_amd64.zip
-  # - &print-ami-id
-  #   run:
-  #     name: Print AMI_ID
-  #     command: echo $AMI_ID
+  - &install-packer
+    run:
+      name: Install packer
+      command: |
+        wget -q https://releases.hashicorp.com/packer/1.6.2/packer_1.6.2_linux_amd64.zip
+        unzip -o packer_1.6.2_linux_amd64.zip -d /usr/local/bin
+        rm packer_1.6.2_linux_amd64.zip
+  - &print-ami-id
+    run:
+      name: Print AMI_ID
+      command: echo $AMI_ID
 
 jobs:
   build:
@@ -127,55 +95,51 @@ jobs:
           name: Run prettier check
           command: npm run prettier:check
 
-  # packer-validate:
-  #   executor: terraform-executor
-  #   steps:
-  #     - checkout
-  #     - *show-current-branch-name
-  #     # - *install-packer
-  #     - run:
-  #         name: Check Packer version
-  #         command: |
-  #           cd infrastructure/
-  #           packer validate photogallery-packer.json
+  packer-validate:
+    executor: terraform-executor
+    steps:
+      - checkout
+      - *show-current-branch-name
+      - *install-packer
+      - run:
+          name: Check Packer version
+          command: |
+            cd infrastructure/
+            packer validate photogallery-packer.json
 
-  # packer-build-ami:
-  #   executor: terraform-executor
-  #   steps:
-  #     - checkout
-  #     - *show-current-branch-name
-  #     - *install-packer
-  #     - run:
-  #         name: Packer build ami
-  #         command: |
-  #           cd infrastructure/
-  #           ARTIFACT=$(packer build -machine-readable photogallery-packer.json | awk -F, '$0 ~/artifact,0,id/ {print $6}')
-  #           echo 'export AMI_ID=$(echo $ARTIFACT | cut -d ":" -f2)' >> $BASH_ENV;
-  #           source $BASH_ENV;
-  #           mkdir /tmp/artifacts;
-  #           echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > /tmp/artifacts/amivar.tf;
-  #     - run:
-  #         name: Check amivar.tf contents
-  #         command: cat /tmp/artifacts/amivar.tf
-  #     - store_artifacts:
-  #         path: /tmp/artifacts
+  packer-build-ami:
+    executor: terraform-executor
+    steps:
+      - checkout
+      - *show-current-branch-name
+      - *install-packer
+      - run:
+          name: Packer build ami
+          command: |
+            cd infrastructure/
+            ARTIFACT=$(packer build -machine-readable photogallery-packer.json | awk -F, '$0 ~/artifact,0,id/ {print $6}')
+            echo 'export AMI_ID=$(echo $ARTIFACT | cut -d ":" -f2)' >> $BASH_ENV;
+            source $BASH_ENV;
+            mkdir /tmp/artifacts;
+            echo ${AMI_ID}
+            echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > /tmp/artifacts/amivar.tf;
+      - run:
+          name: Check amivar.tf contents
+          command: cat /tmp/artifacts/amivar.tf
+      - store_artifacts:
+          path: /tmp/artifacts
 
   terraform-validate:
     executor: terraform-executor
     steps:
       - checkout
       - *show-current-branch-name
-      - run:
-          name: Copy amivar.tf file
-          command: |
-            [[ -f /tmp/artifacts/amivar.tf ]]
-            then
-              cp /tmp/artifacts/amivar.tf infrastructure/
-            fi
+      - *print-ami-id
       - run:
           name: Terraform validate & format
           command: |
             cd infrastructure/
+            echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > amivar.tf;
             terraform init -backend=false
             terraform validate
             terraform fmt -check
@@ -187,25 +151,22 @@ jobs:
       - attach_workspace:
           at: ./
       - *show-current-branch-name
-      - run:
-          name: Copy amivar.tf file
-          command: |
-            [[ -f /tmp/artifacts/amivar.tf ]]
-            then
-              cp /tmp/artifacts/amivar.tf artifacts/infrastructure/
-            fi
+      - *print-ami-id
       - run:
           name: Terraform Plan
           command: |
             cd artifacts/infrastructure/
             terraform init
             terraform workspace select ${CIRCLE_BRANCH} || terraform workspace new ${CIRCLE_BRANCH}
+            echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > amivar.tf;
             terraform plan
       - run:
           name: Terraform Apply
           command: |
             cd artifacts/infrastructure/
             terraform workspace select ${CIRCLE_BRANCH}
+            echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > amivar.tf
+            cat amivar.tf
             terraform apply --auto-approve
             echo 'export PHOTOGALLERY_IP=$(terraform output photogallery_service_ip_address)' >> $BASH_ENV
             terraform output photogallery_service_ip_address > ../photogallery_service_ip_address.txt
@@ -301,30 +262,30 @@ workflows:
                 - develop
                 - staging
                 - master
-      # - packer-validate:
-      #     requires:
-      #       - linting
-      #       - prettier
-      #     filters:
-      #       branches:
-      #         only:
-      #           - develop
-      #           - staging
-      #           - master
-      # - packer-build-ami:
-      #     requires:
-      #       - packer-validate
-      #     filters:
-      #       branches:
-      #         only:
-      #           - develop
-      #           - staging
-      #           - master
-      - terraform-validate:
+      - packer-validate:
           requires:
-            # - packer-build-ami
             - linting
             - prettier
+          filters:
+            branches:
+              only:
+                - develop
+                - staging
+                - master
+      - packer-build-ami:
+          requires:
+            - packer-validate
+          filters:
+            branches:
+              only:
+                - develop
+                - staging
+                - master
+      - terraform-validate:
+          requires:
+            - packer-build-ami
+            # - linting
+            # - prettier
           filters:
             branches:
               only:
