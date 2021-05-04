@@ -53,10 +53,14 @@ aliases:
         wget -q https://releases.hashicorp.com/packer/1.6.2/packer_1.6.2_linux_amd64.zip
         unzip -o packer_1.6.2_linux_amd64.zip -d /usr/local/bin
         rm packer_1.6.2_linux_amd64.zip
-  - &print-ami-id
-    run:
-      name: Print AMI_ID
-      command: echo $AMI_ID
+  # - &copy-amivar-file
+  #   run:
+  #     name: Copy amivar.tf file
+  #     command: |
+  #       [[ -f /tmp/artifacts/amivar.tf ]]
+  #       then
+  #         cp /tmp/artifacts/amivar.tf /artifacts/infrastructure
+  #       fi
 
 jobs:
   build:
@@ -128,18 +132,30 @@ jobs:
           command: cat /tmp/artifacts/amivar.tf
       - store_artifacts:
           path: /tmp/artifacts
+      - persist_to_workspace:
+          root: ./
+          paths:
+            - /tmp/artifacts/amivar.tf
 
   terraform-validate:
     executor: terraform-executor
     steps:
       - checkout
       - *show-current-branch-name
-      - *print-ami-id
+      - attach_workspace:
+          at: ./
+      - run:
+          name: Copy amivar.tf file
+          command: |
+            [[ -f /tmp/artifacts/amivar.tf ]]
+            then
+              cp /tmp/artifacts/amivar.tf /infrastructure
+            fi
       - run:
           name: Terraform validate & format
           command: |
             cd infrastructure/
-            echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > amivar.tf;
+            cat amivar.tf
             terraform init -backend=false
             terraform validate
             terraform fmt -check
@@ -151,21 +167,26 @@ jobs:
       - attach_workspace:
           at: ./
       - *show-current-branch-name
-      - *print-ami-id
+      - run:
+          name: Copy amivar file
+          command: |
+            [[ -f /tmp/artifacts/amivar.tf ]]
+            then
+              cp /tmp/artifacts/amivar.tf /artifacts/infrastructure
+            fi
       - run:
           name: Terraform Plan
           command: |
             cd artifacts/infrastructure/
+            cat amivar.tf
             terraform init
             terraform workspace select ${CIRCLE_BRANCH} || terraform workspace new ${CIRCLE_BRANCH}
-            echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > amivar.tf;
             terraform plan
       - run:
           name: Terraform Apply
           command: |
             cd artifacts/infrastructure/
             terraform workspace select ${CIRCLE_BRANCH}
-            echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > amivar.tf
             cat amivar.tf
             terraform apply --auto-approve
             echo 'export PHOTOGALLERY_IP=$(terraform output photogallery_service_ip_address)' >> $BASH_ENV
