@@ -15,7 +15,7 @@ echo "ubuntu ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/ubuntu
 #installing ssh key
 sudo mkdir -p /home/ubuntu/.ssh
 sudo chmod 700 /home/ubuntu/.ssh
-sudo cp /tmp/devkey.pub /home/ubuntu/.ssh/authorized_keys
+sudo cp /tmp/mykey.pub /home/ubuntu/.ssh/authorized_keys
 sudo chmod 600 /home/ubuntu/.ssh/authorized_keys
 sudo chown -R ubuntu /home/ubuntu/.ssh
 sudo usermod --shell /bin/bash ubuntu
