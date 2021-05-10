@@ -132,18 +132,12 @@ jobs:
           command: cat /tmp/artifacts/amivar.tf
       - store_artifacts:
           path: /tmp/artifacts
-      - persist_to_workspace:
-          root: ./
-          paths:
-            - /tmp/artifacts/amivar.tf
 
   terraform-validate:
     executor: terraform-executor
     steps:
       - checkout
       - *show-current-branch-name
-      - attach_workspace:
-          at: ./
       - run:
           name: Copy amivar.tf file
           command: |
@@ -172,7 +166,7 @@ jobs:
           command: |
             [[ -f /tmp/artifacts/amivar.tf ]]
             then
-              cp /tmp/artifacts/amivar.tf /artifacts/infrastructure
+              cp /tmp/artifacts/amivar.tf /artifacts/infrastructure/
             fi
       - run:
           name: Terraform Plan
@@ -186,8 +180,8 @@ jobs:
           name: Terraform Apply
           command: |
             cd artifacts/infrastructure/
-            terraform workspace select ${CIRCLE_BRANCH}
             cat amivar.tf
+            terraform workspace select ${CIRCLE_BRANCH}
             terraform apply --auto-approve
             echo 'export PHOTOGALLERY_IP=$(terraform output photogallery_service_ip_address)' >> $BASH_ENV
             terraform output photogallery_service_ip_address > ../photogallery_service_ip_address.txt
