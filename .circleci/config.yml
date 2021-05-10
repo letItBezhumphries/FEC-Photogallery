@@ -53,14 +53,6 @@ aliases:
         wget -q https://releases.hashicorp.com/packer/1.6.2/packer_1.6.2_linux_amd64.zip
         unzip -o packer_1.6.2_linux_amd64.zip -d /usr/local/bin
         rm packer_1.6.2_linux_amd64.zip
-  # - &copy-amivar-file
-  #   run:
-  #     name: Copy amivar.tf file
-  #     command: |
-  #       [[ -f /tmp/artifacts/amivar.tf ]]
-  #       then
-  #         cp /tmp/artifacts/amivar.tf /artifacts/infrastructure
-  #       fi
 
 jobs:
   build:
@@ -115,6 +107,8 @@ jobs:
     executor: terraform-executor
     steps:
       - checkout
+      - attach_workspace:
+          at: ./
       - *show-current-branch-name
       - *install-packer
       - run:
@@ -130,20 +124,32 @@ jobs:
       - run:
           name: Check amivar.tf contents
           command: cat /tmp/artifacts/amivar.tf
+      - run:
+          name: Copy amivar.tf
+          command: |
+            mkdir -p artifacts
+            cp /tmp/artifacts/amivar.tf artifacts/
       - store_artifacts:
           path: /tmp/artifacts
+          destination: artifacts
+      - persist_to_workspace:
+          root: ./
+          paths:
+            - artifacts
 
   terraform-validate:
     executor: terraform-executor
     steps:
       - checkout
+      - attach_workspace:
+          at: ./
       - *show-current-branch-name
       - run:
           name: Copy amivar.tf file
           command: |
-            [[ -f /tmp/artifacts/amivar.tf ]]
+            [[ -f artifacts/amivar.tf ]]
             then
-              cp /tmp/artifacts/amivar.tf /infrastructure/
+              cp artifacts/amivar.tf /infrastructure
             fi
       - run:
           name: Terraform validate & format
@@ -164,9 +170,9 @@ jobs:
       - run:
           name: Copy amivar file
           command: |
-            [[ -f /tmp/artifacts/amivar.tf ]]
+            [[ -f artifacts/amivar.tf ]]
             then
-              cp /tmp/artifacts/amivar.tf /artifacts/infrastructure/
+              cp artifacts/amivar.tf /artifacts/infrastructure
             fi
       - run:
           name: Terraform Plan
