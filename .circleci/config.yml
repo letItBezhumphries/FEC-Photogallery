@@ -125,11 +125,12 @@ jobs:
           name: Copy amivar.tf
           command: |
             mkdir -p artifacts
-            cp infrastructure/amivar.tf artifacts/
+            cp infrastructure/amivar.tf artifacts/infrastructure/
       - persist_to_workspace:
           root: ./
           paths:
             - infrastructure/amivar.tf
+            - artifacts/infrastructure/amivar.tf
 
   terraform-validate:
     executor: terraform-executor
@@ -155,10 +156,15 @@ jobs:
           at: ./
       - *show-current-branch-name
       - run:
+          name: Copy amivar.tf file into artifacts/infrastructure directory
+          command: |
+            cat infrastructure/amivar.tf
+            cp infrastructure/amivar.tf artifacts/infrastructure/
+            cat artifacts/infrastructure/amivar.tf
+      - run:
           name: Terraform Plan
           command: |
             cd artifacts/infrastructure/
-            cp infrastructure/amivar.tf .
             cat amivar.tf
             terraform init
             terraform workspace select ${CIRCLE_BRANCH} || terraform workspace new ${CIRCLE_BRANCH}
