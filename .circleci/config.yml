@@ -125,7 +125,7 @@ jobs:
           name: Copy amivar.tf
           command: |
             mkdir -p artifacts
-            cp infrastructure/amivar.tf artifacts/infrastructure/
+            cp infrastructure/amivar.tf artifacts/infrastructure/amivar.tf
       - persist_to_workspace:
           root: ./
           paths:
