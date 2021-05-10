@@ -118,24 +118,20 @@ jobs:
             ARTIFACT=$(packer build -machine-readable photogallery-packer.json | awk -F, '$0 ~/artifact,0,id/ {print $6}')
             echo 'export AMI_ID=$(echo $ARTIFACT | cut -d ":" -f2)' >> $BASH_ENV;
             source $BASH_ENV;
-            mkdir /tmp/artifacts;
             echo ${AMI_ID}
-            echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > /tmp/artifacts/amivar.tf;
+            echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > amivar.tf;
       - run:
           name: Check amivar.tf contents
-          command: cat /tmp/artifacts/amivar.tf
+          command: cat infrastructure/amivar.tf
       - run:
           name: Copy amivar.tf
           command: |
             mkdir -p artifacts
-            cp /tmp/artifacts/amivar.tf artifacts/
-      - store_artifacts:
-          path: /tmp/artifacts
-          destination: artifacts
+            cp infrastructure/amivar.tf artifacts/
       - persist_to_workspace:
           root: ./
           paths:
-            - artifacts
+            - infrastructure/amivar.tf
 
   terraform-validate:
     executor: terraform-executor
@@ -146,7 +142,9 @@ jobs:
       - *show-current-branch-name
       - run:
           name: Copy amivar.tf file
-          command: cp artifacts/amivar.tf /infrastructure
+          command: |
+            cat artifacts/amivar.tf
+            cp artifacts/amivar.tf /infrastructure
       - run:
           name: Terraform validate & format
           command: |
