@@ -107,8 +107,6 @@ jobs:
     executor: terraform-executor
     steps:
       - checkout
-      - attach_workspace:
-          at: ./
       - *show-current-branch-name
       - *install-packer
       - run:
@@ -141,11 +139,6 @@ jobs:
           at: ./
       - *show-current-branch-name
       - run:
-          name: Copy amivar.tf file
-          command: |
-            cat artifacts/amivar.tf
-            cp artifacts/amivar.tf /infrastructure
-      - run:
           name: Terraform validate & format
           command: |
             cd infrastructure/
@@ -161,9 +154,6 @@ jobs:
       - attach_workspace:
           at: ./
       - *show-current-branch-name
-      - run:
-          name: Copy amivar file
-          command: cp artifacts/amivar.tf /artifacts/infrastructure
       - run:
           name: Terraform Plan
           command: |
