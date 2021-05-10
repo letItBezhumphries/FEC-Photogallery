@@ -158,6 +158,7 @@ jobs:
           name: Terraform Plan
           command: |
             cd artifacts/infrastructure/
+            cp infrastructure/amivar.tf .
             cat amivar.tf
             terraform init
             terraform workspace select ${CIRCLE_BRANCH} || terraform workspace new ${CIRCLE_BRANCH}
