@@ -12,11 +12,6 @@ variable "project" {
   default = "fec-brokentable-photogallery"
 }
 
-# variable "port" {}
-
-# variable "host" {}
-
-
 variable "PATH_TO_PUBLIC_KEY" {
   default = "mykey.pub"
 }

@@ -1,5 +1,5 @@
 output "photogallery_bucket_name" {
-  value = aws_s3_bucket.photogallery_s3_bucket.id
+  value = aws_s3_bucket.brokentable_s3_bucket.id
 }
 
 output "photogallery_cloudfront_distribution_id" {

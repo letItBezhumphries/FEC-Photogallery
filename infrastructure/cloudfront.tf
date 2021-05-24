@@ -11,7 +11,7 @@ resource "aws_cloudfront_distribution" "photogallery_s3_distribution" {
       origin_protocol_policy = "https-only"
       origin_ssl_protocols   = ["TLSv1", "TLSv1.1", "TLSv1.2"]
     }
-    domain_name = aws_s3_bucket.photogallery_s3_bucket.bucket_regional_domain_name
+    domain_name = aws_s3_bucket.brokentable_s3_bucket.bucket_regional_domain_name
     origin_id   = "default-origin"
   }
 

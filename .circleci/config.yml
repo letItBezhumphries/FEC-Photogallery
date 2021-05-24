@@ -121,9 +121,6 @@ jobs:
             echo ${AMI_ID}
             echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > amivar.tf;
       - run:
-          name: Check amivar.tf contents
-          command: cat infrastructure/amivar.tf
-      - run:
           name: Copy amivar.tf to workspace directory
           command: |
             mkdir -p artifacts
@@ -145,7 +142,6 @@ jobs:
           name: Terraform validate & format
           command: |
             cd infrastructure/
-            cat amivar.tf
             terraform init -backend=false
             terraform validate
             terraform fmt -check
@@ -204,12 +200,12 @@ jobs:
             echo $AWS_BUCKET_NAME
             if [ "${CIRCLE_BRANCH}" == "master" ]
             then 
-              aws --region ${AWS_REGION} s3 sync ~/photos-repo/public/dist s3://${AWS_BUCKET_NAME} --delete
+              aws --region ${AWS_REGION} s3 sync ~/photos-repo/public/dist s3://${AWS_BUCKET_NAME}/photogallery/latest --delete
             elif [ "${CIRCLE_BRANCH}" == "staging" ]
             then 
-              aws --region ${AWS_REGION} s3 sync ~/photos-repo/public/dist s3://${AWS_BUCKET_NAME} --delete
+              aws --region ${AWS_REGION} s3 sync ~/photos-repo/public/dist s3://${AWS_BUCKET_NAME}/photogallery/latest --delete
             else
-              aws --region ${AWS_REGION} s3 sync ~/photos-repo/public/dist s3://${AWS_BUCKET_NAME} --delete
+              aws --region ${AWS_REGION} s3 sync ~/photos-repo/public/dist s3://${AWS_BUCKET_NAME}/photogallery/latest --delete
             fi
 
   deploy-to-aws-cloudfront:

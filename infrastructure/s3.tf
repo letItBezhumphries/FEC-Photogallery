@@ -3,7 +3,7 @@
 ##################
 
 
-resource "aws_s3_bucket" "photogallery_s3_bucket" {
+resource "aws_s3_bucket" "brokentable_s3_bucket" {
   bucket        = local.prefix
   acl           = "public-read"
   force_destroy = true

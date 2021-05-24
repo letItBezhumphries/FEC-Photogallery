@@ -71,7 +71,7 @@ const prodConfig = {
     }),
     new HtmlWebpackPlugin({
       template: './public/index.html',
-      filename: 'photogallery.html'
+      filename: 'index.html'
     }),
     new Dotenv({
       path: './.env',
