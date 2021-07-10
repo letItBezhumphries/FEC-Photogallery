@@ -27,10 +27,9 @@ const PhotoBanner = ({ heroImage, loading, getRestaurantPhotos }) => {
     }
   };
 
-  console.log('photos:', heroImage, 'loading:', loading);
-  return loading && !heroImage ? (
-    <Spinner />
-  ) : (
+  return loading && !heroImage
+    ? <Spinner />
+    : (
     <Fragment>
       <div className="banner-container">
         <div className="banner-background img-fluid">
@@ -48,7 +47,7 @@ const PhotoBanner = ({ heroImage, loading, getRestaurantPhotos }) => {
         </div>
       </div>
     </Fragment>
-  );
+      );
 };
 
 PhotoBanner.propTypes = {

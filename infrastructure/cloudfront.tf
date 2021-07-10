@@ -2,7 +2,7 @@
 # Cloudfront Resources
 ##########################
 
-resource "aws_cloudfront_distribution" "photogallery_s3_distribution" {
+resource "aws_cloudfront_distribution" "brokentable_s3_distribution" {
 
   origin {
     custom_origin_config {

@@ -1,9 +1,9 @@
-output "photogallery_bucket_name" {
+output "brokentable_bucket_name" {
   value = aws_s3_bucket.brokentable_s3_bucket.id
 }
 
-output "photogallery_cloudfront_distribution_id" {
-  value = aws_cloudfront_distribution.photogallery_s3_distribution.id
+output "brokentable_cloudfront_distribution_id" {
+  value = aws_cloudfront_distribution.brokentable_s3_distribution.id
 }
 
 output "photogallery_service_ip_address" {
