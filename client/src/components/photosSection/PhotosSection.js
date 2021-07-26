@@ -28,11 +28,9 @@ const PhotosSection = ({ getRestaurantPhotos, setPhotosFilter, name, loading, ph
     setPhotosFilter(filterType);
   };
 
-  return loading && !name
-    ? (
+  return loading && !name ? (
     <Spinner />
-      )
-    : (
+  ) : (
     <Fragment>
       <div className="photos-section">
         <div className="photo-gallery-header">
@@ -51,7 +49,7 @@ const PhotosSection = ({ getRestaurantPhotos, setPhotosFilter, name, loading, ph
       </div>
       {viewModal ? <Modal /> : null}
     </Fragment>
-      );
+  );
 };
 
 PhotosSection.propTypes = {
