@@ -5,6 +5,7 @@
   "main": "webpack.config.js",
   "scripts": {
     "start": "node ./server/server.js",
+    "test-server": "node ./server/test-server.js",
     "build": "webpack --config webpack.prod.js",
     "server": "nodemon ./server/server.js",
     "client": "webpack serve --config webpack.dev.js",
