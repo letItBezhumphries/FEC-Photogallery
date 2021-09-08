@@ -4,11 +4,12 @@ const seedData = require('../seed/generateSeedData');
 const seedMongodb = require('../seed/seedMongodb');
 const { dropCollection } = require('./dropCollection');
 
-const db = `mongodb+srv://${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@${process.env.DEV_ATLAS_PROJECT}.mongodb.net/${process.env.DATABASE_NAME}?retryWrites=true&w=majority`;
+// const db = `mongodb+srv://${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@${process.env.DEV_ATLAS_PROJECT}.mongodb.net/${process.env.DATABASE_NAME}?retryWrites=true&w=majority`;
+const uri = `mongodb://${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@${process.env.MONGO_URI}`;
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(db, {
+    await mongoose.connect(uri, {
       useNewUrlParser: true,
       useCreateIndex: true,
       useFindAndModify: false,
