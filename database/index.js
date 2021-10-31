@@ -9,9 +9,9 @@ if (process.env.NODE_ENV !== 'production') {
   console.log('in development!!');
   require('dotenv').config({ path: "../.deploy.env"});
   db3 = `mongodb://${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@${process.env.MONGODB_HOSTNAME}:${process.env.MONGO_PORT}/${process.env.DATABASE_NAME}?authSource=admin`
-} else {
-  console.log('in production!!');
+} else {  
   require('dotenv').config({ path: "../.production.env"});
+  console.log('in production!!');
   db3 = `mongodb://${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@${process.env.MONGODB_HOSTNAME}:${process.env.MONGO_PORT}/${process.env.DATABASE_NAME}?authSource=admin`
 }
 
